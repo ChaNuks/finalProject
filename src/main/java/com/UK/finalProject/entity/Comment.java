@@ -1,14 +1,14 @@
 package com.UK.finalProject.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Comment {
 
     private Long id;
@@ -20,15 +20,7 @@ public class Comment {
     private LocalDate updatedAt;
     private LocalDate deletedAt;
 
-    @Builder
-    public Comment(Long id, String content, Long parentId, Long memberId, Long boardId, LocalDate createdAt, LocalDate updatedAt, LocalDate deletedAt) {
-        this.id = id;
+    public void createComment(String content) {
         this.content = content;
-        this.parentId = parentId;
-        this.memberId = memberId;
-        this.boardId = boardId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
     }
 }

@@ -5,6 +5,8 @@ import com.UK.finalProject.entity.Member;
 import com.UK.finalProject.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +18,13 @@ public class MemberController {
 
     // 멤버 조회
     @GetMapping("/member/{id}")
-    public MemberDTO getMember (@PathVariable("id") long id) {
-        return memberService.findMemberById(id);
+    public ResponseEntity<MemberDTO> getMember (@PathVariable("id") long id) {
+        MemberDTO memberDTO = memberService.findMemberById(id);
+        if (memberDTO != null) {
+            return ResponseEntity.ok(memberDTO);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MemberDTO());
+        }
     }
 
     // 회원가입
