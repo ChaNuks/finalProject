@@ -2,8 +2,11 @@ package com.UK.finalProject.service;
 
 import com.UK.finalProject.dto.MemberDTO;
 import com.UK.finalProject.entity.Member;
+import com.UK.finalProject.exception.CustomException;
+import com.UK.finalProject.exception.ErrorCode;
 import com.UK.finalProject.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,10 +17,13 @@ public class MemberService {
 
     // 회원 조회
     public MemberDTO findMemberById(long id) {
+
         Member foundMember = memberRepository.findMemberById(id);
+
         if (foundMember == null) {
-            System.out.println("해당 회원 정보를 찾을 수 없음");
+            throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
         }
+
         return new MemberDTO(foundMember);
 
         // 멤버 정보가 없을 시 "해당 회원정보를 찾을 수 없음"이라고 출력하게 만들기
@@ -35,11 +41,17 @@ public class MemberService {
     // 로그인
     public boolean login(String email, String password) {
 
+
+        // 존재하지 않을 때, 로그인 정보가 일치하지 않을 때 (email 또는 password가 틀렸을 때)
         Member checkMember = memberRepository.findMemberByEmail(email);
-        if (checkMember != null && checkMember.getPassword().equals(password)) {
+
+        if (checkMember == null) {
+            throw new CustomException(ErrorCode.WRONG_EMAIL);
+        } else if (!checkMember.getPassword().equals(password)) {
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+        } else {
             return true;
         }
-        return false;
     }
 
     // 회원정보 수정

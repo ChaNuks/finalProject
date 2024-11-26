@@ -1,7 +1,8 @@
 package com.UK.finalProject.controller;
 
 import com.UK.finalProject.dto.MemberDTO;
-import com.UK.finalProject.entity.Member;
+import com.UK.finalProject.exception.CustomException;
+import com.UK.finalProject.exception.ErrorCode;
 import com.UK.finalProject.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -16,43 +17,55 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        throw new CustomException(ErrorCode.UNAUTHORIZED);
+    }
+
     // 멤버 조회
-    @GetMapping("/member/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<MemberDTO> getMember (@PathVariable("id") long id) {
         MemberDTO memberDTO = memberService.findMemberById(id);
-        if (memberDTO != null) {
-            return ResponseEntity.ok(memberDTO);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MemberDTO());
-        }
+        return ResponseEntity.ok(memberDTO);
     }
 
     // 회원가입
     @PostMapping("/signup")
-    public String signUp (@RequestBody MemberDTO memberDTO) {
-        return memberService.signUp(memberDTO);
+    public ResponseEntity<String> signUp (@RequestBody MemberDTO memberDTO) {
+
+        if (memberDTO.getEmail().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_EMAIL);
+        } else if (memberDTO.getEmail().length() > 50) {
+            throw new CustomException(ErrorCode.INVALID_EMAIL);
+        } else if (memberDTO.getPassword().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_PASSWORD);
+        } else if (memberDTO.getName().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_NAME);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(memberDTO));
     }
 
     // 로그인
     @PostMapping("/login")
-    public String login (@RequestBody MemberDTO memberDTO, HttpSession session) {
+    public ResponseEntity<String> login (@RequestBody MemberDTO memberDTO, HttpSession session) {
         if (memberService.login(memberDTO.getEmail(), memberDTO.getPassword())) {
             session.setAttribute("member", memberDTO.getEmail());
-            return "로그인 완료";
+            return ResponseEntity.ok("로그인 완료");
         }
-        return "로그인 실패";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
     }
 
     // 회원정보 수정
     @PutMapping("/member/{id}")
-    public String updateMember(@PathVariable("id") long id, @RequestBody MemberDTO memberDTO) {
-        return memberService.update(id, memberDTO);
+    public ResponseEntity<String> updateMember(@PathVariable("id") long id, @RequestBody MemberDTO memberDTO) {
+        return ResponseEntity.ok(memberService.update(id, memberDTO));
     }
 
     // 회원 탈퇴
     @DeleteMapping("/member/{id}")
-    public String deleteMember(@PathVariable("id") long id) {
-        return memberService.delete(id);
+    public ResponseEntity<String> deleteMember(@PathVariable("id") long id) {
+        return ResponseEntity.ok(memberService.delete(id));
     }
 
 }

@@ -71,7 +71,7 @@ public class MemberRepository {
 
         try {
             connection = dataSource.getConnection();
-            //connection.setAutoCommit(false);
+//            connection.setAutoCommit(false);
             pstnt = connection.prepareStatement(sql);
 
             pstnt.setString(1, member.getEmail());
@@ -99,7 +99,7 @@ public class MemberRepository {
             }
         }
 
-        return affected > 0 ? "회원가입 완료" : "회원가입 실패";
+        return affected > 0 ? "회원가입 완료" : "이메일이 중복됩니다.";
     }
 
     // 로그인

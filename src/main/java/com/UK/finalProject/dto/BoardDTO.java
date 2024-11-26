@@ -16,8 +16,8 @@ public class BoardDTO {
     private String title;
     private String content;
     private String boardImage;
-    private long memberId;
-    private long categoryId;
+    private Long memberId;
+    private Long categoryId;
 
 
     public BoardDTO(Board board) {

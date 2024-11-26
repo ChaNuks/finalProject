@@ -41,6 +41,8 @@ public class Board {
         this.boardImage = boardImage;
         this.categoryId = categoryId;
         this.status = Status.WRITTEN;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = null;
     }
 
 }
