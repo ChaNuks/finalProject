@@ -1,5 +1,6 @@
 package com.UK.finalProject.controller;
 
+import com.UK.finalProject.common.auth.service.PasswordService;
 import com.UK.finalProject.dto.MemberDTO;
 import com.UK.finalProject.exception.CustomException;
 import com.UK.finalProject.exception.ErrorCode;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final PasswordService passwordService;
 
     @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        throw new CustomException(ErrorCode.UNAUTHORIZED);
+    public ResponseEntity<String> test(@RequestParam("data") String data) {
+        return ResponseEntity.status(HttpStatus.OK).body(passwordService.encodePassword(data));
     }
 
     // 멤버 조회
