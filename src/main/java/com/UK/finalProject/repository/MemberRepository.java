@@ -1,8 +1,12 @@
 package com.UK.finalProject.repository;
 
 import com.UK.finalProject.entity.Member;
+import com.UK.finalProject.exception.CustomException;
+import com.UK.finalProject.exception.ErrorCode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,12 +66,12 @@ public class MemberRepository {
     }
 
     // 회원가입
-    public String signupMember(Member member) {
+    public ResponseEntity<String> signupMember(Member member) {
         LocalDateTime localDateTime = LocalDateTime.now();
         String sql = "INSERT INTO MEMBER (email, password, name, nickname, image) VALUES (?, ?, ?, ?, ?)";
         Connection connection = null;
         PreparedStatement pstnt = null;
-        int affected = 0;
+//        int affected = 0;
 
         try {
             connection = dataSource.getConnection();
@@ -80,16 +84,15 @@ public class MemberRepository {
             pstnt.setString(4, member.getNickname());
             pstnt.setString(5, member.getImage());
 
-            affected = pstnt.executeUpdate();
-            //connection.commit();
+//            affected = pstnt.executeUpdate();
+//            connection.commit();
+
+//            if (affected > 0) {
+//                return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail());
+//            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException e2) {
-                e2.printStackTrace();
-            }
         } finally {
             try {
                 connection.close();
@@ -99,7 +102,8 @@ public class MemberRepository {
             }
         }
 
-        return affected > 0 ? "회원가입 완료" : "이메일이 중복됩니다.";
+        return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail());
+//        return affected > 0 ? member.getEmail() : "회원가입 실패";
     }
 
     // 로그인

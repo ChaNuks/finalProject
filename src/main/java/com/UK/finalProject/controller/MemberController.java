@@ -21,6 +21,10 @@ public class MemberController {
 
     @GetMapping("/test")
     public ResponseEntity<String> test(@RequestParam("data") String data) {
+        String encodedPassword = passwordService.encodePassword(data);
+        System.out.println("암호화된 패스워드 : " + encodedPassword);
+        boolean check = passwordService.matches(data, encodedPassword + "1");
+        System.out.println("결과 체크 : " + check);
         return ResponseEntity.status(HttpStatus.OK).body(passwordService.encodePassword(data));
     }
 
@@ -33,11 +37,16 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp (@RequestBody MemberDTO memberDTO) {
+    public ResponseEntity<ResponseEntity<String>> signUp (@RequestBody MemberDTO memberDTO) {
 
         if (memberDTO.getEmail().isEmpty()) {
             throw new CustomException(ErrorCode.EMPTY_EMAIL);
-        } else if (memberDTO.getEmail().length() > 50) {
+        } else if (!isValidEmail(memberDTO.getEmail())) {
+            System.out.println("잘못된 이메일 형식입니다.");
+            throw new CustomException(ErrorCode.WRONG_EMAIL);
+        }
+
+        if (memberDTO.getEmail().length() > 50) {
             throw new CustomException(ErrorCode.INVALID_EMAIL);
         } else if (memberDTO.getPassword().isEmpty()) {
             throw new CustomException(ErrorCode.EMPTY_PASSWORD);
@@ -47,6 +56,15 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(memberDTO));
     }
+
+    // 이메일 정규 표현식
+    private boolean isValidEmail(String email) {
+
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+
+
 
     // 로그인
     @PostMapping("/login")

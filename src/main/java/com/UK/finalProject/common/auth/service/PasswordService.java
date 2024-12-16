@@ -21,4 +21,9 @@ public class PasswordService {
     public String encodePassword(String originalPassword) {
      return passwordEncoder.encode(originalPassword);
     }
+
+    // 패스워드 일치 여부 검증
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
 }

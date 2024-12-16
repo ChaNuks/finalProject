@@ -1,5 +1,6 @@
 package com.UK.finalProject.service;
 
+import com.UK.finalProject.common.auth.service.PasswordService;
 import com.UK.finalProject.dto.MemberDTO;
 import com.UK.finalProject.entity.Member;
 import com.UK.finalProject.exception.CustomException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordService passwordService;
 
     // 회원 조회
     public MemberDTO findMemberById(long id) {
@@ -30,13 +32,32 @@ public class MemberService {
     }
 
     // 회원 가입
-    public String signUp(MemberDTO memberDTO) {
+    public ResponseEntity<String> signUp(MemberDTO memberDTO) {
+
+        if (isDuplicatedEmail(memberDTO.getEmail())) {
+            throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
+        }
 
         Member toSaveMember = new Member();
-        toSaveMember.createMember(memberDTO.getEmail(), memberDTO.getPassword(), memberDTO.getName(), memberDTO.getNickname(), memberDTO.getImage());
 
+        String encodePassword = passwordService.encodePassword(memberDTO.getPassword());
+
+        toSaveMember.createMember(memberDTO.getEmail(), encodePassword, memberDTO.getName(), memberDTO.getNickname(), memberDTO.getImage());
         return memberRepository.signupMember(toSaveMember);
+
     }
+
+    // 이메일 중복 검사
+    private boolean isDuplicatedEmail(String email) {
+
+        Member foundMember = memberRepository.findMemberByEmail(email);
+
+        if (foundMember != null) {
+            return true;
+        }
+        return false;
+    }
+
 
     // 로그인
     public boolean login(String email, String password) {

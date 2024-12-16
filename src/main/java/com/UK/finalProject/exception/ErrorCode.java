@@ -13,6 +13,7 @@ public enum ErrorCode {
     EMPTY_EMAIL(HttpStatus.BAD_REQUEST, "C006", "이메일을 입력해 주세요."),
     EMPTY_PASSWORD(HttpStatus.BAD_REQUEST, "C007", "비밀번호를 입력해 주세요."),
     EMPTY_NAME(HttpStatus.BAD_REQUEST, "C008", "이름을 입력해 주세요."),
+    DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "C009", "이메일이 중복됩니다."),
 
     // 게시글 에러
     EMPTY_TITLE(HttpStatus.BAD_REQUEST, "B001", "제목을 입력해 주세요."),
