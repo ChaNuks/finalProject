@@ -1,5 +1,6 @@
 package com.UK.finalProject.exception;
 
+import com.UK.finalProject.common.auth.service.response.BaseResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,12 +11,14 @@ public class GlobalExceptionHandler {
 
     // 특정 예외 처리 (사용자 젇의)
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> HandleCustomException(CustomException e) {
+    public ResponseEntity<BaseResponse<String>> HandleCustomException(CustomException e) {
 
         ErrorCode errorCode = e.getErrorCode();
 
+        BaseResponse<String> failResponse = new BaseResponse<>(errorCode.getCode(), errorCode.getMessage());
+
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
-                .body(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()));
+                .body(failResponse);
     }
 }

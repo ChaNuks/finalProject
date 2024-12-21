@@ -1,8 +1,6 @@
 package com.UK.finalProject.repository;
 
 import com.UK.finalProject.entity.Member;
-import com.UK.finalProject.exception.CustomException;
-import com.UK.finalProject.exception.ErrorCode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,13 +27,12 @@ public class MemberRepository {
         Connection connection = null;
         PreparedStatement pstnt = null;
         ResultSet rs = null;
+//        Statement statement = connection.createStatement(); // SQL Injection 공격에 취약하므로 안 씀
 
-        try {
-            connection = dataSource.getConnection();
-//          Statement statement = connection.createStatement(); // SQL Injection 공격에 취약하므로 안 씀
+        try (connection = dataSource.getConnection();
             pstnt = connection.prepareStatement(sql);
             pstnt.setLong(1, id);
-            rs = pstnt.executeQuery();    // 쿼리 결과 담는 곳
+            rs = pstnt.executeQuery();) {
 
             if (rs.next()) {
                 return Member.builder()
@@ -52,26 +49,18 @@ public class MemberRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-                pstnt.close();
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        } 
 
         return null;
     }
 
     // 회원가입
-    public ResponseEntity<String> signupMember(Member member) {
+    public String signupMember(Member member) {
         LocalDateTime localDateTime = LocalDateTime.now();
         String sql = "INSERT INTO MEMBER (email, password, name, nickname, image) VALUES (?, ?, ?, ?, ?)";
         Connection connection = null;
         PreparedStatement pstnt = null;
-//        int affected = 0;
+        int affected = 0;
 
         try {
             connection = dataSource.getConnection();
@@ -84,12 +73,8 @@ public class MemberRepository {
             pstnt.setString(4, member.getNickname());
             pstnt.setString(5, member.getImage());
 
-//            affected = pstnt.executeUpdate();
+            affected = pstnt.executeUpdate();
 //            connection.commit();
-
-//            if (affected > 0) {
-//                return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail());
-//            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,7 +87,7 @@ public class MemberRepository {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail());
+        return member.getEmail();
 //        return affected > 0 ? member.getEmail() : "회원가입 실패";
     }
 

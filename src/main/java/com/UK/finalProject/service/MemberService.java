@@ -32,7 +32,7 @@ public class MemberService {
     }
 
     // 회원 가입
-    public ResponseEntity<String> signUp(MemberDTO memberDTO) {
+    public String signUp(MemberDTO memberDTO) {
 
         if (isDuplicatedEmail(memberDTO.getEmail())) {
             throw new CustomException(ErrorCode.DUPLICATED_EMAIL);

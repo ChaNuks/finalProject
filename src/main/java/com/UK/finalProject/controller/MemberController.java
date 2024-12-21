@@ -1,6 +1,7 @@
 package com.UK.finalProject.controller;
 
 import com.UK.finalProject.common.auth.service.PasswordService;
+import com.UK.finalProject.common.auth.service.response.BaseResponse;
 import com.UK.finalProject.dto.MemberDTO;
 import com.UK.finalProject.exception.CustomException;
 import com.UK.finalProject.exception.ErrorCode;
@@ -37,12 +38,11 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<ResponseEntity<String>> signUp (@RequestBody MemberDTO memberDTO) {
+    public ResponseEntity<BaseResponse<String>> signUp (@RequestBody MemberDTO memberDTO) {
 
         if (memberDTO.getEmail().isEmpty()) {
             throw new CustomException(ErrorCode.EMPTY_EMAIL);
         } else if (!isValidEmail(memberDTO.getEmail())) {
-            System.out.println("잘못된 이메일 형식입니다.");
             throw new CustomException(ErrorCode.WRONG_EMAIL);
         }
 
@@ -54,7 +54,10 @@ public class MemberController {
             throw new CustomException(ErrorCode.EMPTY_NAME);
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(memberDTO));
+        BaseResponse<String> successResponse = new BaseResponse<>("201", "회원가입에 성공하였습니다.", memberService.signUp(memberDTO));
+//        BaseResponse<String> failResponse = new BaseResponse<>("400", "회원가입에 실패하였습니다.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
     }
 
     // 이메일 정규 표현식
