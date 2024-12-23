@@ -24,15 +24,16 @@ public class MemberRepository {
     @Transactional(readOnly = true)
     public Member findMemberById(long id) {
         String sql = "SELECT * FROM MEMBER WHERE ID = ?";
-        Connection connection = null;
-        PreparedStatement pstnt = null;
+//        Connection connection = null;
+//        PreparedStatement pstnt = null;
         ResultSet rs = null;
 //        Statement statement = connection.createStatement(); // SQL Injection 공격에 취약하므로 안 씀
 
-        try (connection = dataSource.getConnection();
-            pstnt = connection.prepareStatement(sql);
-            pstnt.setLong(1, id);
-            rs = pstnt.executeQuery();) {
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setLong(1, id);
+            rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 return Member.builder()
@@ -58,35 +59,21 @@ public class MemberRepository {
     public String signupMember(Member member) {
         LocalDateTime localDateTime = LocalDateTime.now();
         String sql = "INSERT INTO MEMBER (email, password, name, nickname, image) VALUES (?, ?, ?, ?, ?)";
-        Connection connection = null;
-        PreparedStatement pstnt = null;
-        int affected = 0;
+//        Connection connection = null;
+//        PreparedStatement pstnt = null;
 
-        try {
-            connection = dataSource.getConnection();
-//            connection.setAutoCommit(false);
-            pstnt = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
-            pstnt.setString(1, member.getEmail());
-            pstnt.setString(2, member.getPassword());
-            pstnt.setString(3, member.getName());
-            pstnt.setString(4, member.getNickname());
-            pstnt.setString(5, member.getImage());
-
-            affected = pstnt.executeUpdate();
-//            connection.commit();
+            pstmt.setString(1, member.getEmail());
+            pstmt.setString(2, member.getPassword());
+            pstmt.setString(3, member.getName());
+            pstmt.setString(4, member.getNickname());
+            pstmt.setString(5, member.getImage());
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-                pstnt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
-
         return member.getEmail();
 //        return affected > 0 ? member.getEmail() : "회원가입 실패";
     }
@@ -94,13 +81,12 @@ public class MemberRepository {
     // 로그인
     public Member findMemberByEmail(String email) {
         String sql = "SELECT email, password FROM MEMBER WHERE email = ?";
-        Connection connection = null;
-        PreparedStatement pstmt = null;
+//        Connection connection = null;
+//        PreparedStatement pstmt = null;
         ResultSet rs = null;
 
-        try {
-            connection = dataSource.getConnection();
-            pstmt = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, email);
             rs = pstmt.executeQuery();
 
@@ -112,19 +98,6 @@ public class MemberRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException e2) {
-                e2.printStackTrace();
-            }
-        } finally {
-           try {
-               connection.close();
-               pstmt.close();
-               rs.close();
-           } catch (SQLException e) {
-               e.printStackTrace();
-           }
         }
         return null;
     }
@@ -133,14 +106,11 @@ public class MemberRepository {
     public String updateMember(Member member) {
 
         String sql = "UPDATE MEMBER SET password = ?, name = ?, nickname = ?, image = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        Connection connection = null;
-        PreparedStatement pstmt = null;
         ResultSet rs = null;
         int affected = 0;
 
-        try {
-            connection = dataSource.getConnection();
-            pstmt = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, member.getPassword());
             pstmt.setString(2, member.getNickname());
@@ -159,13 +129,10 @@ public class MemberRepository {
     public String deleteMember(long id) {
 
         String sql = "DELETE FROM MEMBER WHERE id = ?";
-        Connection connection = null;
-        PreparedStatement pstmt = null;
         int affected = 0;
 
-        try {
-            connection = dataSource.getConnection();
-            pstmt = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setLong(1, id);
             affected = pstmt.executeUpdate();
